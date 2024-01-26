@@ -14,7 +14,7 @@ defense_params = {
         'clip_max': 1.0,
         'clip_min': -1.0,
         'epoch_num': 80,
-        'num_steps': 2,
+        'num_steps': 10,
         'lr': 1e-2,
     },
 }
