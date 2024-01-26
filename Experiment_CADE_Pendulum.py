@@ -63,6 +63,7 @@ model = BGM(latent_dim=6,
             A=A)
 model.load_state_dict(ckpt_generative['model'])
 model.eval()
+model.to(device)
 
 model_resnet50 = resnet.ResNet50(num_classes=num_classes).to(device)
 model_resnet50.load_state_dict(ckpt_resnet50)
@@ -103,7 +104,7 @@ l_asr_vgg16 = []
 l_asr_vgg16_pgd = []
 
 for mode in range(len(l_attacking_nodes)):
-    attacker = CADELatent(model, attacking_nodes=l_attacking_nodes[mode], substitute=model_white, device=device).to(device)
+    attacker = CADELatent(model, attacking_nodes=l_attacking_nodes[mode], substitute=model_white, device=device)
     num_success_resnet50 = 0
     num_success_resnet50_pgd = 0
     num_success_vgg16 = 0

@@ -5,7 +5,7 @@ import math
 import numpy as np
 
 
-class CADELatent(nn.Module):
+class CADELatent:
     def __init__(self, generative_model, attacking_nodes, substitute, target_idx=0, l_dag=1, num_causal_variables=4, device='cuda'):
         """
 
@@ -17,7 +17,6 @@ class CADELatent(nn.Module):
         @param num_causal_variables: the number of causal_variables
         @param device: 'cuda' or 'cpu'
         """
-        super(CADELatent, self).__init__()
         self.generative_model = generative_model
         self.generative_model.eval()
         self.generative_model.requires_grad_(False)
@@ -233,6 +232,7 @@ class CADEObservable:
             diff_endo = torch.clamp(diff_endo, min_clip, max_clip)
 
             full_endogenous = endogenous + diff_endo
+
 
             if causal_layer:
                 for _ in range(2): # the depth of causal graph is 2
