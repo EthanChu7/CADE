@@ -68,6 +68,11 @@ python -u Experiment_CADE_SynMeasurement.py --substitute lin
 python -u Experiment_CADE_SynMeasurement.py --substitute mlp
 ```
 
+## Demos on Pendulum and CelebA:
+[Demo_CADE_Pendulum.ipynb](Demo_CADE_Pendulum.ipynb)
+
+[Demo_CADE_CelebA.ipynb](Demo_CADE_CelebA.ipynb)
+
 ## Download the checkpoints for the experiment, please visit:
 
 https://drive.google.com/drive/folders/1khGEtAqlpKtLFspSKdz5zyObwpDGoLzV?usp=share_link
@@ -78,16 +83,16 @@ https://drive.google.com/drive/folders/1khGEtAqlpKtLFspSKdz5zyObwpDGoLzV?usp=sha
 
 ### Train the attacking models:
 
-model_training/Pendulum/model_train_standard.py
+[model_training/Pendulum/model_train_standard.py](model_training/Pendulum/model_train_standard.py)
 
-model_training/Pendulum/model_train_adversarial.py
+[model_training/Pendulum/model_train_adversarial.py](model_training/Pendulum/model_train_adversarial.py)
 
-model_training/CelebA/model_train_standard.py
+[model_training/CelebA/model_train_standard.py](model_training/CelebA/model_train_standard.py)
 
-model_training/CelebA/model_train_adversarial.py
+[model_training/CelebA/model_train_adversarial.py](model_training/CelebA/model_train_adversarial.py)
 
-model_training/SynMeasurement/model_train_standard.py
+[model_training/SynMeasurement/model_train_standard.py](model_training/SynMeasurement/model_train_standard.py)
 
-model_training/SynMeasurement/model_train_adversarial.py
+[model_training/SynMeasurement/model_train_adversarial.py](model_training/SynMeasurement/model_train_adversarial.py)
 
 
