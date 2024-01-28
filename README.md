@@ -70,8 +70,24 @@ python -u Experiment_CADE_SynMeasurement.py --substitute mlp
 
 ## Download the checkpoints for the experiment, please visit:
 
-## Feel free to train the models from scratch, run
+https://drive.google.com/drive/folders/1khGEtAqlpKtLFspSKdz5zyObwpDGoLzV?usp=share_link
+
+## Feel free to train the models from scratch:
+
+### The causal generative models for Pendulum and CelabA are trained based on [this repository](https://github.com/xwshen51/DEAR)
+
+### Train the attacking models:
 
 model_training/Pendulum/model_train_standard.py
 
 model_training/Pendulum/model_train_adversarial.py
+
+model_training/CelebA/model_train_standard.py
+
+model_training/CelebA/model_train_adversarial.py
+
+model_training/SynMeasurement/model_train_standard.py
+
+model_training/SynMeasurement/model_train_adversarial.py
+
+
