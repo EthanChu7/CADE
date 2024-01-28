@@ -85,7 +85,9 @@ class PGDtraining(BaseDefense):
                      lr = 0.1,
                      momentum = 0.1,
                      save_per_epoch = 10,
-                     loss_type='ce'):
+                     loss_type='ce',
+                     clip_max=1.0,
+                     clip_min=0.):
         """Parameter parser.
 
         Parameters
@@ -120,6 +122,8 @@ class PGDtraining(BaseDefense):
         self.momentum = momentum
         self.save_per_epoch = save_per_epoch
         self.loss_type = loss_type
+        self.clip_max = clip_max
+        self.clip_min = clip_min
 
     def train(self, device, train_loader, optimizer, epoch, label_idx=39):
         """
@@ -148,7 +152,7 @@ class PGDtraining(BaseDefense):
             data, target = data.to(device), target.to(device)
             target = target[:, label_idx]
 
-            data_adv, output = self.adv_data(data, target, ep = self.epsilon, num_steps = self.num_steps, perturb_step_size = self.perturb_step_size)
+            data_adv, output = self.adv_data(data, target, ep = self.epsilon, num_steps = self.num_steps, perturb_step_size = self.perturb_step_size, clip_max=self.clip_max, clip_min=self.clip_min)
             loss = self.calculate_loss(output, target)
 
             loss.backward()
@@ -194,7 +198,7 @@ class PGDtraining(BaseDefense):
             correct += pred.eq(target.view_as(pred)).sum().item()
 
             # print adversarial accuracy
-            data_adv, output_adv = self.adv_data(data, target, ep = self.epsilon, num_steps = self.num_steps)
+            data_adv, output_adv = self.adv_data(data, target, ep = self.epsilon, num_steps = self.num_steps, perturb_step_size = self.perturb_step_size, clip_max=self.clip_max, clip_min=self.clip_min)
 
             test_loss_adv += self.calculate_loss(output_adv, target, redmode = 'sum').item()  # sum up batch loss
             pred_adv = output_adv.argmax(dim = 1, keepdim = True)  # get the index of the max log-probability
@@ -211,13 +215,13 @@ class PGDtraining(BaseDefense):
             test_loss_adv, correct_adv, len(test_loader.dataset),
             100. * correct_adv / len(test_loader.dataset)))
 
-    def adv_data(self, data, output, ep = 0.3, num_steps = 10, perturb_step_size = 0.01):
+    def adv_data(self, data, output, ep = 0.3, num_steps = 10, perturb_step_size = 0.01, clip_max=1.0, clip_min=0.0):
         """
         Generate input(adversarial) data for training.
         """
 
         adversary = PGD(self.model, self.device)
-        data_adv = adversary.generate(data, output.flatten(), epsilon = ep, num_steps = num_steps, step_size = perturb_step_size)
+        data_adv = adversary.generate(data, output.flatten(), epsilon = ep, num_steps = num_steps, step_size = perturb_step_size, clip_max=clip_max, clip_min=clip_min)
         output = self.model(data_adv)
 
         return data_adv, output
