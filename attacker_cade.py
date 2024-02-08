@@ -235,7 +235,7 @@ class CADEObservable:
 
 
             if causal_layer:
-                for _ in range(2): # the depth of causal graph is 2
+                for _ in range(3): # the depth of causal graph is 3
                     full_endogenous = (1-mask_is_intervened) * (full_endogenous @ self.causal_dag) + mask_is_intervened * full_endogenous + (1-mask_is_intervened) * exogenous
 
             # feed the intervened endogenous to surrogate model to get outcome
@@ -269,7 +269,7 @@ class CADEObservable:
             full_endogenous[:, self.attacking_nodes[i]] = attacking_endogenous[:, i]  # concat the column
 
         if causal_layer:
-            for _ in range(2): # the depth of causal graph is 2
+            for _ in range(3): # the depth of causal graph is 3
                 full_endogenous = (1-mask_is_intervened) * (full_endogenous @ self.causal_dag) + mask_is_intervened * full_endogenous + (1-mask_is_intervened) * exogenous
         # feed the intervened endogenous to surrogate model to get outcome
         x_adv = torch.cat((full_endogenous[:, :self.y_index], full_endogenous[:, self.y_index+1:]), dim=1)
