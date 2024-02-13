@@ -99,10 +99,7 @@ class dataload_withlabel(torch.utils.data.Dataset):
         label = torch.from_numpy(np.asarray(self.imglabel[idx]))
 
         pil_img = Image.open(img_path).convert('RGB')
-        array = np.array(pil_img)
-        array1 = np.array(label)
-        label = torch.from_numpy(array1)
-        data = torch.from_numpy(array)
+
         if self.transforms:
             data = self.transforms(pil_img)
         else:
