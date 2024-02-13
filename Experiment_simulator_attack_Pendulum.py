@@ -1,24 +1,21 @@
 import os.path
 import torch
-import utils
 import models.resnet as resnet
 import models.vgg as vgg
-
-
 import matplotlib.pyplot as plt
 import os
-
-from torchvision import datasets, transforms
-from PIL import Image
-from torch.utils.data import TensorDataset, DataLoader
-
-import matplotlib.image as mpimg
-import random
+from preprocess.preprocess_img import dataload_withlabel
+from torch.utils.data import DataLoader
 import math
 import numpy as np
-import pandas as pd 
-if not os.path.exists('res_attack/sim_clip/'):
-  os.makedirs('res_attack/sim_clip/')
+import pandas as pd
+from config_cade import get_config_pend
+
+
+root_file_name = 'sim'
+
+if not os.path.exists('res_attack/{}/'.format(root_file_name)):
+  os.makedirs('res_attack/{}/'.format(root_file_name))
 
 
 def projection(theta, phi, x, y, base = -0.5):
@@ -86,22 +83,14 @@ def simulate_examples(attack_type='all', eps=0.1):
             ax.add_artist(shadow)
             ax.set_xlim((0, 20))
             ax.set_ylim((-1, 21))
-            new=pd.DataFrame({
-                      'i':(i-scale[0][0])/(scale[0][1]-0),
-                      'j':(j-scale[1][0])/(scale[1][1]-0),
-                      'shade':(shade-scale[2][0])/(scale[2][1]-0),
-                      'mid':(mid-scale[2][0])/(scale[2][1]-0)
-                      },
 
-                     index=[1])
-            # empty=empty.append(new,ignore_index=True)
             plt.axis('off')
 
-            if not os.path.exists('res_attack/sim_clip/type_{}_eps_{}'.format(attack_type, eps)):
-                os.makedirs('res_attack/sim_clip/type_{}_eps_{}'.format(attack_type, eps))
+            if not os.path.exists('res_attack/{}/type_{}_eps_{}'.format(root_file_name, attack_type, eps)):
+                os.makedirs('res_attack/{}/type_{}_eps_{}'.format(root_file_name, attack_type, eps))
 
             if count == 4:
-              plt.savefig('res_attack/sim_clip/type_{}_eps_{}/a_'.format(attack_type, eps) + str(int(i)) + '_' + str(int(j)) + '_' + str(int(shade)) + '_' + str(int(mid)) +'.png',dpi=96)
+              plt.savefig('res_attack/{}/type_{}_eps_{}/a_'.format(root_file_name, attack_type, eps) + str(int(i)) + '_' + str(int(j)) + '_' + str(int(shade)) + '_' + str(int(mid)) +'.png',dpi=96)
               count = 0
 
             plt.clf()
@@ -114,88 +103,29 @@ def pend_label_transform(label):
     return label
 
 
-class dataload_withlabel(torch.utils.data.Dataset):
-    def __init__(self, root, label_file=None, image_size=64, mode="train", sup_prop=1., num_sample=0):
-        # label_file: 'pendulum_label_downstream.txt'
-
-        self.label_file = label_file
-        if label_file is not None:
-            self.attrs_df = pd.read_csv(os.path.join(root, label_file))
-            # attr = self.attrs_df[:, [1,2,3,7,5]]
-            self.split_df = pd.read_csv(os.path.join(root, label_file))
-            splits = self.split_df['partition'].values
-            split_map = {
-                "train": 0,
-                "valid": 1,
-                "test": 2,
-                "all": None,
-            }
-            split = split_map[verify_str_arg(mode.lower(), "split",
-                                             ("train", "valid", "test", "all"))]
-            mask = slice(None) if split is None else (splits == split)
-            self.mask = mask
-            np.random.seed(2)
-            if num_sample > 0:
-                idxs = [i for i, x in enumerate(mask) if x]
-                not_sample = np.random.permutation(idxs)[num_sample:]
-                mask[not_sample] = False
-            self.attrs_df = self.attrs_df.values
-            self.attrs_df[self.attrs_df == -1] = 0
-            self.attrs_df = self.attrs_df[mask][:, [0,1,2,3,6]]
-            self.imglabel = torch.as_tensor(self.attrs_df.astype(np.float))
-            self.imgs = []
-            for i in range(3):
-                mode1 = list(split_map.keys())[i]
-                root1 = root + mode1
-                imgs = os.listdir(root1)
-                self.imgs += [os.path.join(root, mode1, k) for k in imgs]
-            self.imgs = np.array(self.imgs)[mask]
-        else:
-            root = root + mode
-            imgs = os.listdir(root)
-            self.imgs = [os.path.join(root, k) for k in imgs]
-            self.imglabel = [list(map(float, k[:-4].split("_")[1:])) for k in imgs]
-        self.transforms = transforms.Compose([transforms.Resize((image_size, image_size)),transforms.ToTensor()])
-        np.random.seed(2)
-        self.n = len(self.imgs)
-        self.available_label_index = np.random.choice(self.n, int(self.n * sup_prop), replace=0)
-
-    def __getitem__(self, idx):
-        img_path = self.imgs[idx]
-        if not (idx in self.available_label_index):
-            label = torch.zeros(4).long() - 1
-        else:
-            if self.label_file is None:
-                label = torch.from_numpy(np.asarray(self.imglabel[idx]))
-            else:
-                label = self.imglabel[idx]
-        pil_img = Image.open(img_path).convert('RGB')
-        array = np.array(pil_img)
-        array1 = np.array(label)
-        label = torch.from_numpy(array1)
-        data = torch.from_numpy(array)
-        if self.transforms:
-            data = self.transforms(pil_img)
-        else:
-            pil_img = np.asarray(pil_img).reshape(96,96,3)
-            data = torch.from_numpy(pil_img)
-        return data, label.float()
-
-    def __len__(self):
-        return len(self.imgs)
-
-
 """
 LOAD DATASETS
 """
 
-
-
+args = get_config_pend()
+print(args)
 device = 'cuda'
-ckpt_resnet50 = torch.load("ckpt/pendulum/new_model_with_noise/pendulum_ResNet50_epoch30.pt", map_location=device)
-ckpt_resnet50_pgd = torch.load('ckpt/pendulum/new_model_with_noise/pendulum_pgdtraining_8_resnet50_epoch80.pth', map_location=device)
-ckpt_vgg16 = torch.load("ckpt/pendulum/new_model_with_noise/pendulum_vgg16_epoch120.pt", map_location=device)
-ckpt_vgg16_pgd = torch.load('ckpt/pendulum/new_model_with_noise/pendulum_pgdtraining_8_vgg16_epoch80.pth', map_location=device)
+
+path_ckpt_resnet50 = args.path_ckpt_resnet50
+path_ckpt_resnet50_pgd = args.path_ckpt_resnet50_pgd
+path_ckpt_vgg16 = args.path_ckpt_vgg16
+path_ckpt_vgg16_pgd = args.path_ckpt_vgg16_pgd
+
+ckpt_resnet50 = torch.load(path_ckpt_resnet50, map_location=device)
+ckpt_resnet50_pgd = torch.load(path_ckpt_resnet50_pgd, map_location=device)
+ckpt_vgg16 = torch.load(path_ckpt_vgg16, map_location=device)
+ckpt_vgg16_pgd = torch.load(path_ckpt_vgg16_pgd, map_location=device)
+
+
+# ckpt_resnet50 = torch.load("ckpt/pendulum/new_model_with_noise/pendulum_ResNet50_epoch30.pt", map_location=device)
+# ckpt_resnet50_pgd = torch.load('ckpt/pendulum/new_model_with_noise/pendulum_pgdtraining_8_resnet50_epoch80.pth', map_location=device)
+# ckpt_vgg16 = torch.load("ckpt/pendulum/new_model_with_noise/pendulum_vgg16_epoch120.pt", map_location=device)
+# ckpt_vgg16_pgd = torch.load('ckpt/pendulum/new_model_with_noise/pendulum_pgdtraining_8_vgg16_epoch80.pth', map_location=device)
 
 
 num_classes = 50
@@ -214,11 +144,7 @@ model_resnet50_pgd.eval()
 model_vgg16.eval()
 model_vgg16_pgd.eval()
 
-
-
 target_label_idx = 0
-
-
 
 epsilons = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
 attack_types = ['1', '2', '3', 'all']
@@ -232,8 +158,9 @@ for attack_type in attack_types:
         print('simulating data...')
         simulate_examples(attack_type=attack_type, eps=eps)
         print('data simulated!')
-        test_set = dataload_withlabel('res_attack/sim_clip/', image_size=64,
+        test_set = dataload_withlabel('res_attack/{}/'.format(root_file_name), image_size=64,
                                        mode='type_{}_eps_{}'.format(attack_type, eps))
+        np.random.seed(2)
         test_loader = DataLoader(test_set, batch_size=32, shuffle=False, drop_last=False, num_workers=0)
         print('notice the size')
         size_test = len(test_loader.dataset)
@@ -318,7 +245,7 @@ for attack_type in attack_types:
 print(total_res)
 for i in range(4):
     df = pd.DataFrame(total_res[i])
-    df.to_csv('res_attack/sim/res_sim_eps_{}.csv'.format(attack_types[i]))
+    df.to_csv('res_attack/{}/res_sim_eps_{}.csv'.format(root_file_name, attack_types[i]))
 
 
 
