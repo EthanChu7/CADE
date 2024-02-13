@@ -121,13 +121,6 @@ ckpt_resnet50_pgd = torch.load(path_ckpt_resnet50_pgd, map_location=device)
 ckpt_vgg16 = torch.load(path_ckpt_vgg16, map_location=device)
 ckpt_vgg16_pgd = torch.load(path_ckpt_vgg16_pgd, map_location=device)
 
-
-# ckpt_resnet50 = torch.load("ckpt/pendulum/new_model_with_noise/pendulum_ResNet50_epoch30.pt", map_location=device)
-# ckpt_resnet50_pgd = torch.load('ckpt/pendulum/new_model_with_noise/pendulum_pgdtraining_8_resnet50_epoch80.pth', map_location=device)
-# ckpt_vgg16 = torch.load("ckpt/pendulum/new_model_with_noise/pendulum_vgg16_epoch120.pt", map_location=device)
-# ckpt_vgg16_pgd = torch.load('ckpt/pendulum/new_model_with_noise/pendulum_pgdtraining_8_vgg16_epoch80.pth', map_location=device)
-
-
 num_classes = 50
 
 model_resnet50 = resnet.ResNet50(num_classes=num_classes).to(device)
@@ -238,7 +231,6 @@ for attack_type in attack_types:
                         l_asr_resnet50_pgd_trans,
                         l_asr_vgg16_trans,
                         l_asr_vgg16_pgd_trans])
-    # results = results.transpose().flatten()
     print(results)
     total_res.append(results)
 
