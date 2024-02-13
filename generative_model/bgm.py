@@ -1,10 +1,7 @@
-import torch
-
-from sagan import *
-import torchvision.models as models
-from resnet import *
+from generative_model.sagan import *
+from generative_model.resnet import *
 import torch.nn.init as init
-from causal_model import *
+from generative_model.causal_model import *
 
 
 class ResEncoder(nn.Module):
