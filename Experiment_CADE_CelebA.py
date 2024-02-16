@@ -134,10 +134,11 @@ for mode in range(1):
             os.makedirs('res_attack/celeba/cade_{}'.format(substitute))
         np.save('res_attack/celeba/cade_{}/x_cade_batch_{}.npy'.format(substitute, batch_id), x_cade.detach().cpu().numpy())
 
-        pred_resnet50 = torch.argmax(model_resnet50(x_cade), dim=1)
-        pred_resnet50_pgd = torch.argmax(model_resnet50_pgd(x_cade), dim=1)  # transfer to resnet50 pgd defense
-        pred_vgg16 = torch.argmax(model_vgg16(x_cade), dim=1)  # transfer to vgg16
-        pred_vgg16_pgd = torch.argmax(model_vgg16_pgd(x_cade), dim=1)  # transfer to vgg16 pgd defense
+        with torch.no_grad():
+            pred_resnet50 = torch.argmax(model_resnet50(x_cade), dim=1)
+            pred_resnet50_pgd = torch.argmax(model_resnet50_pgd(x_cade), dim=1)  # transfer to resnet50 pgd defense
+            pred_vgg16 = torch.argmax(model_vgg16(x_cade), dim=1)  # transfer to vgg16
+            pred_vgg16_pgd = torch.argmax(model_vgg16_pgd(x_cade), dim=1)  # transfer to vgg16 pgd defense
 
         is_success_resnet50 = (torch.abs(pred_resnet50 - label) > 0).float()
         is_success_resnet50_pgd = (torch.abs(pred_resnet50_pgd - label) > 0).float()

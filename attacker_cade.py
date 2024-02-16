@@ -46,7 +46,7 @@ class CADELatent:
         self.generative_model.requires_grad_(False)
         self.generative_model.eval()
 
-        full_z = self.generative_model.forward(x)
+        full_z = self.generative_model(x)
         full_z_adv = full_z.clone()
         full_z_adv.requires_grad = False
         attack_z_adv = full_z_adv[:, self.attacking_nodes]
@@ -71,6 +71,8 @@ class CADELatent:
             mask_is_intervened[:, self.attacking_nodes] = 1.  # set the attacking variables to 1
 
         for epoch in range(epochs):
+            optimizer.zero_grad()
+
             full_z_adv[:, self.attacking_nodes] = attack_z_adv
             diff_full_z = full_z_adv - full_z
             diff_full_z = torch.clamp(diff_full_z, min_clip, max_clip)  # clamp, norm(z)_{inf} <= eps
@@ -112,7 +114,7 @@ class CADELatent:
             # loss_size = torch.mean(torch.sum(torch.abs(full_z_adv - full_z), dim=1))
             # # loss = loss_pred + alpha * loss_size
             loss = loss_pred
-            optimizer.zero_grad()
+
             loss.backward(retain_graph=True)
             optimizer.step()
             # print("epoch: {}, loss_pred: {}, loss_size: {}".format(epoch, loss_pred, loss_size))
@@ -131,7 +133,7 @@ class CADELatent:
         self.generative_model.requires_grad_(False)
         self.generative_model.eval()
 
-        full_z = self.generative_model.forward(x)
+        full_z = self.generative_model(x)
         full_z_adv = full_z.clone()
         attack_z_adv = (torch.rand((full_z.shape[0], len(self.attacking_nodes))).to(self.device) - 0.5) * 2 * epsilon
         full_z_adv[:, self.attacking_nodes] += attack_z_adv
@@ -216,6 +218,8 @@ class CADEObservable:
         optimizer = torch.optim.Adam([attacking_endogenous], lr=step_size)
 
         for epoch in range(num_steps):
+            optimizer.zero_grad()
+
             previous_endogenous = full_endogenous.clone()
 
             mask_is_intervened = torch.zeros_like(exogenous)
@@ -240,7 +244,7 @@ class CADEObservable:
 
             # feed the intervened endogenous to surrogate model to get outcome
             x_adv = torch.cat((full_endogenous[:, :self.y_index], full_endogenous[:, self.y_index+1:]), dim=1)
-            out = self.substitute.forward(x_adv)
+            out = self.substitute(x_adv)
 
             # loss
             loss_pred = -F.mse_loss(out.squeeze(), endogenous[:, self.y_index])
@@ -249,7 +253,6 @@ class CADEObservable:
             if epoch % 10 == 0:
                 print("epoch: {}, loss_ce: {}, loss: {}".format(epoch, loss_pred, loss))
 
-            optimizer.zero_grad()
             loss.backward(retain_graph=True)
             optimizer.step()
 

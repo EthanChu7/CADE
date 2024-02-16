@@ -123,21 +123,22 @@ for mode in range(len(l_attacking_nodes)):
                                 num_steps=num_steps,
                                 step_size=step_size)
 
-        pred_adv_lin = model_lin(x_adv)
-        mse_adv_lin = F.mse_loss(pred_adv_lin.squeeze(), labels_test)
-        mses_lin_mode.append(mse_adv_lin.item())
+        with torch.no_grad():
+            pred_adv_lin = model_lin(x_adv)
+            mse_adv_lin = F.mse_loss(pred_adv_lin.squeeze(), labels_test)
+            mses_lin_mode.append(mse_adv_lin.item())
 
-        pred_adv_lin_pgd = model_lin_pgd(x_adv)
-        mse_adv_lin_pgd = F.mse_loss(pred_adv_lin_pgd.squeeze(), labels_test)
-        mses_lin_pgd_mode.append(mse_adv_lin_pgd.item())
+            pred_adv_lin_pgd = model_lin_pgd(x_adv)
+            mse_adv_lin_pgd = F.mse_loss(pred_adv_lin_pgd.squeeze(), labels_test)
+            mses_lin_pgd_mode.append(mse_adv_lin_pgd.item())
 
-        pred_adv_mlp = model_mlp(x_adv)
-        mse_adv_mlp = F.mse_loss(pred_adv_mlp.squeeze(), labels_test)
-        mses_mlp_mode.append(mse_adv_mlp.item())
+            pred_adv_mlp = model_mlp(x_adv)
+            mse_adv_mlp = F.mse_loss(pred_adv_mlp.squeeze(), labels_test)
+            mses_mlp_mode.append(mse_adv_mlp.item())
 
-        pred_adv_mlp_pgd = model_mlp_pgd(x_adv)
-        mse_adv_mlp_pgd = F.mse_loss(pred_adv_mlp_pgd.squeeze(), labels_test)
-        mses_mlp_pgd_mode.append(mse_adv_mlp_pgd.item())
+            pred_adv_mlp_pgd = model_mlp_pgd(x_adv)
+            mse_adv_mlp_pgd = F.mse_loss(pred_adv_mlp_pgd.squeeze(), labels_test)
+            mses_mlp_pgd_mode.append(mse_adv_mlp_pgd.item())
 
     mses_lin.append(mses_lin_mode)
     mses_lin_pgd.append(mses_lin_pgd_mode)
