@@ -91,11 +91,11 @@ optimizer = torch.optim.Adam(mlp_reg_model_pgd.parameters(), lr=0.0001)
 mlp_reg_model_pgd.train()
 for epoch in range(1500):
     for feat, label in dataloader_train:
+        optimizer.zero_grad()
         pgd = PGD(mlp_reg_model_pgd)
         feat_adv = pgd.generate(feat, label, **attack_params["PGD_reg"])
-        preds_train_adv = mlp_reg_model_pgd.forward(feat_adv)
+        preds_train_adv = mlp_reg_model_pgd(feat_adv)
         loss_adv = mlp_reg_model_pgd.loss(preds_train_adv.squeeze(), label)
-        optimizer.zero_grad()
         loss_adv.backward()
         optimizer.step()
     if epoch % 50 == 0:
@@ -103,13 +103,15 @@ for epoch in range(1500):
 
 # evaluate
 mlp_reg_model_pgd.eval()
-preds_test = mlp_reg_model_pgd.forward(feat_test)
-mse_test = F.mse_loss(preds_test.squeeze(), labels_test, reduction='mean')
+with torch.no_grad():
+    preds_test = mlp_reg_model_pgd(feat_test)
+    mse_test = F.mse_loss(preds_test.squeeze(), labels_test, reduction='mean')
 
 pgd = PGD(mlp_reg_model_pgd)
 feat_test_pgd_adv = pgd.generate(feat_test, labels_test, **attack_params["PGD_reg"])
-preds_test_pgd_adv = mlp_reg_model_pgd.forward(feat_test_pgd_adv)
-mse_test_pgd_adv = F.mse_loss(preds_test_pgd_adv.squeeze(), labels_test, reduction='mean')
+with torch.no_grad():
+    preds_test_pgd_adv = mlp_reg_model_pgd(feat_test_pgd_adv)
+    mse_test_pgd_adv = F.mse_loss(preds_test_pgd_adv.squeeze(), labels_test, reduction='mean')
 
 print("mse_test: {}, mse_adv: {}".format(mse_test, mse_test_pgd_adv))
 # print(mlp_reg_model_pgd.state_dict())
@@ -129,12 +131,12 @@ optimizer = torch.optim.Adam(lin_reg_model_pgd.parameters(), lr=0.0001)
 lin_reg_model_pgd.train()
 for epoch in range(2500):
     for feat, label in dataloader_train:
+        optimizer.zero_grad()
         pgd = PGD(lin_reg_model_pgd)
         feat_adv = pgd.generate(feat, label, **attack_params["PGD_reg"])
-        preds_train_adv = lin_reg_model_pgd.forward(feat_adv)
+        preds_train_adv = lin_reg_model_pgd(feat_adv)
         loss_adv = lin_reg_model_pgd.loss(preds_train_adv.squeeze(), label)
 
-        optimizer.zero_grad()
         loss_adv.backward()
         optimizer.step()
     if epoch % 50 == 0:
@@ -142,13 +144,15 @@ for epoch in range(2500):
 
 # evaluate
 lin_reg_model_pgd.eval()
-preds_test = lin_reg_model_pgd.forward(feat_test)
-mse_test = F.mse_loss(preds_test.squeeze(), labels_test, reduction='mean')
+with torch.no_grad():
+    preds_test = lin_reg_model_pgd(feat_test)
+    mse_test = F.mse_loss(preds_test.squeeze(), labels_test, reduction='mean')
 
 pgd = PGD(lin_reg_model_pgd)
 feat_test_pgd_adv = pgd.generate(feat_test, labels_test, **attack_params["PGD_reg"])
-preds_test_pgd_adv = lin_reg_model_pgd.forward(feat_test_pgd_adv)
-mse_test_pgd_adv = F.mse_loss(preds_test_pgd_adv.squeeze(), labels_test, reduction='mean')
+with torch.no_grad():
+    preds_test_pgd_adv = lin_reg_model_pgd(feat_test_pgd_adv)
+    mse_test_pgd_adv = F.mse_loss(preds_test_pgd_adv.squeeze(), labels_test, reduction='mean')
 
 print("mse_test: {}, mse_adv: {}".format(mse_test, mse_test_pgd_adv))
 

@@ -80,9 +80,9 @@ linear_reg_model.train()
 
 for epoch in range(1000):
     for feat, label in dataloader_train:
-        preds_train = linear_reg_model.forward(feat)
-        loss = linear_reg_model.loss(preds_train.squeeze(), label)
         optimizer.zero_grad()
+        preds_train = linear_reg_model(feat)
+        loss = linear_reg_model.loss(preds_train.squeeze(), label)
         loss.backward()
         optimizer.step()
     if epoch % 50 == 0:
@@ -90,11 +90,11 @@ for epoch in range(1000):
 
 # evaluate
 linear_reg_model.eval()
-preds_test = linear_reg_model.forward(feat_test)
-mse_test = F.mse_loss(preds_test.squeeze(), labels_test, reduction='mean')
-
-print("mse_test: {}".format(mse_test))
-print(linear_reg_model.state_dict())
+with torch.no_grad():
+    preds_test = linear_reg_model(feat_test)
+    mse_test = F.mse_loss(preds_test.squeeze(), labels_test, reduction='mean')
+    print("mse_test: {}".format(mse_test))
+    # print(linear_reg_model.state_dict())
 
 # save checkpoinnt
 cg_data = {
@@ -111,9 +111,9 @@ mlp_reg_model.train()
 
 for epoch in range(1000):
     for feat, label in dataloader_train:
-        preds_train = mlp_reg_model.forward(feat)
-        loss = mlp_reg_model.loss(preds_train.squeeze(), label)
         optimizer.zero_grad()
+        preds_train = mlp_reg_model(feat)
+        loss = mlp_reg_model.loss(preds_train.squeeze(), label)
         loss.backward()
         optimizer.step()
     if epoch % 50 == 0:
@@ -121,11 +121,11 @@ for epoch in range(1000):
 
 # evaluate
 mlp_reg_model.eval()
-preds_test = mlp_reg_model.forward(feat_test)
-mse_test = F.mse_loss(preds_test.squeeze(), labels_test, reduction='mean')
-
-print("mse_test: {}".format(mse_test))
-print(mlp_reg_model.state_dict())
+with torch.no_grad():
+    preds_test = mlp_reg_model(feat_test)
+    mse_test = F.mse_loss(preds_test.squeeze(), labels_test, reduction='mean')
+    print("mse_test: {}".format(mse_test))
+    # print(mlp_reg_model.state_dict())
 
 # save checkpoinnt
 cg_data = {
