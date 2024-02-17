@@ -104,8 +104,8 @@ class CADELatent:
                 N = out.shape[0]
                 # out = F.softmax(out, dim=1)
                 for i in range(N):
-                    loss_pred -= out[i, target_label[i]]
-                    loss_pred += out[i, label[i]]
+                    loss_pred = loss_pred - out[i, target_label[i]]
+                    loss_pred = loss_pred + out[i, label[i]]
                 loss_pred = loss_pred / N  # a variant of f2 formulation in C&W attack
             elif type_loss == 'pendulum':
                 loss_pred = -F.cross_entropy(out, label)
@@ -136,7 +136,7 @@ class CADELatent:
         full_z = self.generative_model(x)
         full_z_adv = full_z.clone()
         attack_z_adv = (torch.rand((full_z.shape[0], len(self.attacking_nodes))).to(self.device) - 0.5) * 2 * epsilon
-        full_z_adv[:, self.attacking_nodes] += attack_z_adv
+        full_z_adv[:, self.attacking_nodes] = full_z_adv[:, self.attacking_nodes] + attack_z_adv
 
         if causal_layer:
             causal_z = full_z[:, :self.num_causal_variables]  # 4 causal variables in Pendulum
@@ -217,24 +217,21 @@ class CADEObservable:
 
         optimizer = torch.optim.Adam([attacking_endogenous], lr=step_size)
 
+        mask_is_intervened = torch.zeros_like(exogenous)
+        min_clip = torch.zeros_like(full_endogenous) - np.inf
+        max_clip = torch.zeros_like(full_endogenous) + np.inf
+        mask_is_intervened[:, self.attacking_nodes] = 1.
+        min_clip[:, self.attacking_nodes] = -epsilon
+        max_clip[:, self.attacking_nodes] = epsilon
+
         for epoch in range(num_steps):
             optimizer.zero_grad()
+            # previous_endogenous = full_endogenous.clone()
 
-            previous_endogenous = full_endogenous.clone()
-
-            mask_is_intervened = torch.zeros_like(exogenous)
-            min_clip = torch.zeros_like(full_endogenous) - np.inf
-            max_clip = torch.zeros_like(full_endogenous) + np.inf
-            mask_is_intervened[:, self.attacking_nodes] = 1.
-            min_clip[:, self.attacking_nodes] = -epsilon
-            max_clip[:, self.attacking_nodes] = epsilon
-
-            for i in range(len(self.attacking_nodes)):
-                full_endogenous[:, self.attacking_nodes[i]] = attacking_endogenous[:, i]  # concat the column
+            full_endogenous[:, self.attacking_nodes] = attacking_endogenous
 
             diff_endo = full_endogenous - endogenous
             diff_endo = torch.clamp(diff_endo, min_clip, max_clip)
-
             full_endogenous = endogenous + diff_endo
 
 
@@ -261,15 +258,11 @@ class CADEObservable:
     def attack_random(self, endogenous, epsilon=1., causal_layer=True):
         exogenous = self.recover_exogenous_linear(self.causal_dag, endogenous)
         full_endogenous = endogenous.clone()
-        attacking_endogenous = endogenous[:, self.attacking_nodes]
-        delta_attacking_endogenous = (torch.rand(attacking_endogenous.shape) - 0.5) * 2 * epsilon
-        attacking_endogenous += delta_attacking_endogenous
+        delta_attacking_endogenous = (torch.rand((endogenous.shape[0], len(self.attacking_nodes))) - 0.5) * 2 * epsilon
+        full_endogenous[:, self.attacking_nodes] = full_endogenous[:, self.attacking_nodes] + delta_attacking_endogenous
 
         mask_is_intervened = torch.zeros_like(exogenous)
         mask_is_intervened[:, self.attacking_nodes] = 1.
-
-        for i in range(len(self.attacking_nodes)):
-            full_endogenous[:, self.attacking_nodes[i]] = attacking_endogenous[:, i]  # concat the column
 
         if causal_layer:
             for _ in range(3): # the depth of causal graph is 3
@@ -278,5 +271,6 @@ class CADEObservable:
         x_adv = torch.cat((full_endogenous[:, :self.y_index], full_endogenous[:, self.y_index+1:]), dim=1)
 
         return x_adv
+
 
 
