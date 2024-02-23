@@ -43,14 +43,12 @@ class CADELatent:
         @param causal_layer: apply causal layer or not
         @return: the adversarial examples
         """
-        self.generative_model.requires_grad_(False)
-        self.generative_model.eval()
 
-        full_z = self.generative_model(x)
+        full_z = self.generative_model(x).detach()
         full_z_adv = full_z.clone()
-        full_z_adv.requires_grad = False
-        attack_z_adv = full_z_adv[:, self.attacking_nodes]
-        attack_z_adv.requires_grad = True
+
+        attack_z_adv = full_z[:, self.attacking_nodes]
+        attack_z_adv.requires_grad_(True)
         optimizer = torch.optim.Adam([attack_z_adv], lr=lr)
 
         min_clip = torch.zeros_like(full_z) - np.inf
@@ -72,6 +70,8 @@ class CADELatent:
 
         for epoch in range(epochs):
             optimizer.zero_grad()
+
+            full_z_adv = full_z_adv.detach().clone()
 
             full_z_adv[:, self.attacking_nodes] = attack_z_adv
             diff_full_z = full_z_adv - full_z
@@ -114,11 +114,11 @@ class CADELatent:
             # loss_size = torch.mean(torch.sum(torch.abs(full_z_adv - full_z), dim=1))
             # # loss = loss_pred + alpha * loss_size
             loss = loss_pred
+            print("epoch: {}, loss_pred: {}".format(epoch, loss_pred))
 
-            loss.backward(retain_graph=True)
+            loss.backward()
             optimizer.step()
             # print("epoch: {}, loss_pred: {}, loss_size: {}".format(epoch, loss_pred, loss_size))
-            print("epoch: {}, loss_pred: {}".format(epoch, loss_pred))
 
         return x_adv
 
@@ -177,19 +177,6 @@ class CADEObservable:
         self.substitute = substitute
         self.substitute.requires_grad_(False)
 
-    def markov_blanket(self, causal_dag, y_index):
-        children = np.nonzero(causal_dag[y_index])[0]
-        parents = np.nonzero(causal_dag[:, y_index])[0]
-        co_parents = set()
-        for child in children:
-            sub_co_parents = np.nonzero(causal_dag[:, child])[0]
-            for sub_co_parent in sub_co_parents:
-                if sub_co_parent != y_index:
-                    co_parents.add(sub_co_parent)
-        co_parents = np.array(list(co_parents))
-        print('children: {}, parent: {}, co_parents: {}'.format(children, parents, co_parents))
-
-        return children, parents, co_parents
 
     def recover_exogenous_linear(self, causal_dag, endogenous):
         """
@@ -211,9 +198,9 @@ class CADEObservable:
     def attack(self, endogenous, epsilon=1., causal_layer=True, num_steps=150, step_size=0.1):
         exogenous = self.recover_exogenous_linear(self.causal_dag, endogenous)
         full_endogenous = endogenous.clone()
-        full_endogenous.requires_grad = False
+
         attacking_endogenous = endogenous[:, self.attacking_nodes]
-        attacking_endogenous.requires_grad = True
+        attacking_endogenous.requires_grad_(True)
 
         optimizer = torch.optim.Adam([attacking_endogenous], lr=step_size)
 
@@ -226,7 +213,8 @@ class CADEObservable:
 
         for epoch in range(num_steps):
             optimizer.zero_grad()
-            # previous_endogenous = full_endogenous.clone()
+
+            full_endogenous = full_endogenous.detach().clone()
 
             full_endogenous[:, self.attacking_nodes] = attacking_endogenous
 
@@ -250,7 +238,7 @@ class CADEObservable:
             if epoch % 10 == 0:
                 print("epoch: {}, loss_ce: {}, loss: {}".format(epoch, loss_pred, loss))
 
-            loss.backward(retain_graph=True)
+            loss.backward()
             optimizer.step()
 
         return x_adv
