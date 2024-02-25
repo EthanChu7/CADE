@@ -1,26 +1,15 @@
 import numpy as np
-# from castle.datasets import IIDSimulation
-from sklearn.model_selection import train_test_split
-
-
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
-import math
-from preprocess.preprocess_tab import TabularDataset
+from preprocess.preprocess_tab import TabularDataset, get_measurement_data
 from torch.utils.data import DataLoader
-
 from models.tabular_model import LinearRegression, MLPRegression
-
-import networkx as nx
-import matplotlib.pyplot as plt
-
 from deeprobust.image.attack.pgd_mse import PGD
 
 
 attack_params = {
     "PGD_reg": {
-    'epsilon': 0.1,
+    'epsilon': 0.1, # [0.1, 0.2, 0.3, 0.4, 0.5]
     'clip_max': None,
     'clip_min': None,
     'print_process': False,
@@ -40,45 +29,10 @@ def save_checkpoint(path, model, optimizer, cg_data):
 np.random.seed(0)
 torch.manual_seed(0)
 
-d = 8
-# causal_dag = np.array([[0., 1., 1., 0., 0., 0., 0., 0.],
-#                        [0., 0., 0., 1., 0., 0., 0., 0.],
-#                        [0., 0., 0., 1., 0., 0., 0., 0.],
-#                        [0., 0., 0., 0., 0., 4., 1., 0.],
-#                        [0., 0., 0., 0., 0., 1., 0., 0.],
-#                        [0., 0., 0., 0., 0., 0., 1., 1.],
-#                        [0., 0., 0., 0., 0., 0., 0., 1.],
-#                        [0., 0., 0., 0., 0., 0., 0., 0.]])
-# y_index = 3
-# X = ut.simulate_linear_sem(causal_dag, 10000, 'gauss')
-# np.savetxt('./data/tabular/syn_endo_{}.csv'.format(d), X, delimiter=',')
-
-
-# d = 8
-causal_dag = np.loadtxt('../../data/syn/syn_dag.csv', delimiter=',')
-X = np.loadtxt('../../data/syn/syn_endo.csv', delimiter=',')
 y_index = 3
+feat_train, feat_test, labels_train, labels_test, endo_train, endo_test, causal_dag = get_measurement_data(root='../../data/', y_index=y_index)
 
-label_dic = {}
-variables_names = ['x(A)', 'x(P1)', 'x(P2)', 'y', 'x(CP)', 'x(C1)', 'x(C2)', 'x(D)']
-for i in range(causal_dag.shape[0]):
-    label_dic[i] = variables_names[i]
 
-graph_nx = nx.from_numpy_array(causal_dag, create_using=nx.DiGraph)
-nx.draw(graph_nx, labels=label_dic)
-plt.show()
-
-labels = X[:, y_index]
-features = np.delete(X, y_index, axis=1)
-
-print(min(labels), max(labels))
-
-# # spiliting train and test
-feat_train, feat_test, labels_train, labels_test = train_test_split(features, labels, test_size=0.2, shuffle=True)
-feat_train, feat_test, labels_train, labels_test = torch.FloatTensor(feat_train), \
-                                                   torch.FloatTensor(feat_test), \
-                                                   torch.FloatTensor(labels_train), \
-                                                   torch.FloatTensor(labels_test)
 dataset_train = TabularDataset(feat_train, labels_train)
 dataset_test = TabularDataset(feat_test, labels_test)
 dataloader_train = DataLoader(dataset_train, batch_size=1024, shuffle=True)
@@ -86,7 +40,7 @@ dataloader_train = DataLoader(dataset_train, batch_size=1024, shuffle=True)
 
 
 # training a PGD MLP model
-mlp_reg_model_pgd = MLPRegression(features.shape[1], 32, 1)
+mlp_reg_model_pgd = MLPRegression(feat_train.shape[1], 32, 1)
 optimizer = torch.optim.Adam(mlp_reg_model_pgd.parameters(), lr=0.0001)
 mlp_reg_model_pgd.train()
 for epoch in range(1500):
@@ -121,12 +75,12 @@ print("mse_test: {}, mse_adv: {}".format(mse_test, mse_test_pgd_adv))
 cg_data = {
     'mse_test': mse_test
 }
-path = '../../ckpt/syn/syn_mlp_pgd_test.pth'
+path = '../../ckpt/syn/syn_mlp_pgd.pth'
 save_checkpoint(path, mlp_reg_model_pgd, optimizer, cg_data)
 
 
 # training a PGD Linear model
-lin_reg_model_pgd = LinearRegression(features.shape[1], 1)
+lin_reg_model_pgd = LinearRegression(feat_train.shape[1], 1)
 optimizer = torch.optim.Adam(lin_reg_model_pgd.parameters(), lr=0.0001)
 lin_reg_model_pgd.train()
 for epoch in range(2500):
@@ -161,5 +115,5 @@ print("mse_test: {}, mse_adv: {}".format(mse_test, mse_test_pgd_adv))
 cg_data = {
     'mse_test': mse_test
 }
-path = '../../ckpt/syn/syn_lin_pgd_test.pth'
+path = '../../ckpt/syn/syn_lin_pgd.pth'
 save_checkpoint(path, lin_reg_model_pgd, optimizer, cg_data)
