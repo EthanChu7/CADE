@@ -1,12 +1,11 @@
 import numpy as np
-from sklearn.model_selection import train_test_split
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 from models.tabular_model import LinearRegression, MLPRegression
 from attacker_cade import CADEObservable
 import pandas as pd
 from config_cade import get_config_syn
+from preprocess.preprocess_tab import get_measurement_data
 
 
 np.random.seed(0)
@@ -24,24 +23,8 @@ path_lin_pgd = args.path_lin_pgd
 path_mlp = args.path_mlp
 path_mlp_pgd = args.path_mlp_pgd
 
-
 y_index = 3
-causal_dag = np.loadtxt('./data/syn/syn_dag.csv', delimiter=',')
-endogenous = np.loadtxt('./data/syn/syn_endo.csv', delimiter=',')
-
-
-# spiliting train and test
-endo_train, endo_test = train_test_split(endogenous, test_size=0.2, shuffle=True)
-# print("s", endo_train.shape)
-
-# split endogenous into features and labels
-feat_train = torch.FloatTensor(np.delete(endo_train, y_index, axis=1))
-feat_test = torch.FloatTensor(np.delete(endo_test, y_index, axis=1))
-labels_train = torch.FloatTensor(endo_train[:, y_index])
-labels_test = torch.FloatTensor(endo_test[:, y_index])
-endo_train = torch.FloatTensor(endo_train)
-endo_test = torch.FloatTensor(endo_test)
-causal_dag = torch.FloatTensor(causal_dag)
+feat_train, feat_test, labels_train, labels_test, endo_train, endo_test, causal_dag = get_measurement_data(root='./data/', y_index=y_index)
 
 ranges = torch.max(endo_test, dim=0).values - torch.min(endo_test, dim=0).values
 print(ranges)
