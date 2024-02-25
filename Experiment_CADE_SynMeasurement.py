@@ -87,7 +87,7 @@ elif substitute == 'mlp':
 
 for mode in range(len(l_attacking_nodes)):
     attacker = CADEObservable(causal_dag,
-                              attacking_nodes=np.array(l_attacking_nodes[mode]),
+                              attacking_nodes=l_attacking_nodes[mode],
                               y_index=y_index,
                               substitute=model_base)
     # attacker.attacking_nodes = np.array(l_attacking_nodes[mode])
