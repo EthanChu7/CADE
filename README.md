@@ -10,7 +10,7 @@ In this work we propose CADE, a framework that can generate Counterfactual ADver
 attacker = CADELatent(generative_model=generative_model, 
                       attacking_nodes=attacking_nodes, 
                       substitute=substitute, 
-                      device=device).to(device)
+                      device=device)
                       
 x_cade = attacker.attack_whitebox(x=x, 
                                   label=label, 
