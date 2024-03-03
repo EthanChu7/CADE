@@ -46,12 +46,10 @@ def make_dataloader(args):
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         ])
         # print(args.data_dir)
-        # print('shuffle true hhhh !!')
         dataset = datasets.CelebA(args.data_dir, download=False, transform=trans_f)
 
         data_loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=False, pin_memory=False,
                                                    drop_last=False)
-        # print('shuffle true again hh !')
 
     elif 'pendulum' == args.dataset:
         dataset = dataload_withlabel(args.data_dir, image_size = args.image_size,
