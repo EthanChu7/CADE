@@ -47,7 +47,7 @@ def make_dataloader(args):
         ])
         # print(args.data_dir)
         # print('shuffle true hhhh !!')
-        dataset = datasets.CelebA(args.data_dir, split='train', download=False, transform=trans_f)
+        dataset = datasets.CelebA(args.data_dir, download=False, transform=trans_f)
 
         data_loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=False, pin_memory=False,
                                                    drop_last=False)
