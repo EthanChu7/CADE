@@ -120,7 +120,8 @@ for mode in range(len(l_attacking_nodes)):
         label = label.to(device)
 
         x_cade = attacker.attack_whitebox(x, label, lr=step_size, epochs=num_steps, type_loss=type_loss, epsilon=epsilon * torch.FloatTensor(ranges[mode]).to(device), causal_layer=l_causal[mode])
-
+        x_cade = x_cade.clamp(0, 1)
+        
         if not os.path.exists('res_attack/pendulum/cade_{}'.format(substitute)):
             os.makedirs('res_attack/pendulum/cade_{}'.format(substitute))
         np.save('res_attack/pendulum/cade_{}/x_cade_batch_{}.npy'.format(substitute, batch_id), x_cade.detach().cpu().numpy())
