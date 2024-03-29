@@ -97,8 +97,6 @@ def simulate_examples(attack_type='all', eps=0.1):
             count += 1
 
 def pend_label_transform(label):
-    # transform to 5 classes
-    # label = (label // 10).long()
     label = (label).long()
     return label
 
