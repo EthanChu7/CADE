@@ -78,17 +78,9 @@ class dataload_withlabel(torch.utils.data.Dataset):
 
         root = root + mode
         imgs = os.listdir(root)
-        imgs.sort()
-        # print(imgs)
+
         self.imgs = [os.path.join(root, k) for k in imgs]
         self.imglabel = [list(map(float, k[:-4].split("_")[1:])) for k in imgs]
-
-        # print(np.min(self.imglabel, axis=0))
-        # print(np.max(self.imglabel, axis=0))
-        #
-        # print('the final modified version')
-        # print("mean:", np.mean(self.imglabel, axis=0))
-        # print("std", np.std(self.imglabel, axis=0))
 
         self.transforms = transforms.Compose([transforms.Resize((image_size, image_size)),transforms.ToTensor()])
 
