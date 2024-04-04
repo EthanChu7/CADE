@@ -90,11 +90,8 @@ class dataload_withlabel(torch.utils.data.Dataset):
 
         pil_img = Image.open(img_path).convert('RGB')
 
-        if self.transforms:
-            data = self.transforms(pil_img)
-        else:
-            pil_img = np.asarray(pil_img).reshape(96,96,3)
-            data = torch.from_numpy(pil_img)
+        data = self.transforms(pil_img)
+
         return data, label.float()
 
     def __len__(self):
