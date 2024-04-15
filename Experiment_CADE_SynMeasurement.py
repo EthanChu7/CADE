@@ -29,8 +29,7 @@ feat_train, feat_test, labels_train, labels_test, endo_train, endo_test, causal_
 ranges = torch.max(endo_test, dim=0).values - torch.min(endo_test, dim=0).values
 print(ranges)
 
-# epsilons = [0.1]
-# epsilons = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
+
 mses_lin = []
 mses_lin_pgd = []
 mses_mlp = []
@@ -75,7 +74,7 @@ mses_mlp_pgd.append([mse_clean_mlp_pgd.item()] * len(epsilons))
 # print(mses_mlp)
 # print(mses_mlp_pgd)
 
-l_attacking_nodes = [[4], [4], [5], [5], [5, 6], [5, 6]]
+l_attacking_nodes = [[4], [4], [5], [5], [5, 6], [5, 6]]  # 4: CP, 5: C1, 6: C2
 l_causal_layer = [True, False, True, False, True, False]
 
 if substitute == 'lin':
