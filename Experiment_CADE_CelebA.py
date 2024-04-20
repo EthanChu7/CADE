@@ -124,8 +124,6 @@ for mode in range(1):
         is_true = (pred_ori == label)
 
         x_cade = attacker.attack_whitebox(x, label, lr=step_size, epochs=num_steps, type_loss=type_loss, epsilon=epsilons, causal_layer=l_causal[mode])
-        # x_cade = attacker.attack_random(x, label, epsilon=epsilons/0.7,
-        #                              causal_layer=l_causal[mode])
 
         if not os.path.exists('res_attack/celeba/cade_{}'.format(substitute)):
             os.makedirs('res_attack/celeba/cade_{}'.format(substitute))
