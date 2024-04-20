@@ -119,7 +119,7 @@ for mode in range(len(l_attacking_nodes)):
         x = x.to(device)
         label = label.to(device)
 
-        x_cade = attacker.attack_whitebox(x, label, lr=step_size, epochs=num_steps, type_loss=type_loss, epsilon=epsilon * torch.FloatTensor(ranges[mode]).to(device), causal_layer=l_causal[mode])
+        x_cade = attacker.attack_whitebox(x, label, lr=step_size, epochs=num_steps, type_loss=type_loss, epsilon=epsilon * torch.tensor(ranges[mode], dtype=torch.float).to(device), causal_layer=l_causal[mode])
         x_cade = x_cade.clamp(0, 1)
         
         if not os.path.exists('res_attack/pendulum/cade_{}'.format(substitute)):
@@ -132,10 +132,10 @@ for mode in range(len(l_attacking_nodes)):
             pred_vgg16 = torch.argmax(model_vgg16(x_cade), dim=1)  # transfer to vgg16
             pred_vgg16_pgd = torch.argmax(model_vgg16_pgd(x_cade), dim=1)  # transfer to vgg16 pgd defense
 
-        is_success_resnet50 = (torch.abs(pred_resnet50 - label) > 0).float()
-        is_success_resnet50_pgd = (torch.abs(pred_resnet50_pgd - label) > 0).float()
-        is_success_vgg16 = (torch.abs(pred_vgg16 - label) > 0).float()
-        is_success_vgg16_pgd = (torch.abs(pred_vgg16_pgd - label) > 0).float()
+        is_success_resnet50 = (pred_resnet50 != label).float()
+        is_success_resnet50_pgd = (pred_resnet50_pgd != label).float()
+        is_success_vgg16 = (pred_vgg16 != label).float()
+        is_success_vgg16_pgd = (pred_vgg16_pgd != label).float()
 
         num_success_resnet50_batch_i = torch.sum(is_success_resnet50)  # number of success attacks in batch i
         num_success_resnet50_pgd_batch_i = torch.sum(is_success_resnet50_pgd)

@@ -82,14 +82,11 @@ l_attacking_nodes = [[]]
 l_causal = [False] # since variables z_1:5 both have no descendants in z, thus setting False to avoid extra computations
 epsilons = []
 scales = np.load('scales_celaba.npy')
-for i in range(5):
+for i in range(5):  # attack on z_1:5
     l_attacking_nodes[0].append(i+1)
-    if i < 5:
-        epsilons.append(epsilon * scales[i+1])
+    epsilons.append(epsilon * scales[i+1])
 
-scales = torch.FloatTensor(scales).to(device)
-epsilons = torch.FloatTensor(epsilons).to(device)
-print(epsilons)
+epsilons = torch.tensor(epsilons, dtype=torch.float).to(device)
 
 if substitute == 'resnet50':
     model_white = model_resnet50
@@ -140,10 +137,10 @@ for mode in range(1):
             pred_vgg16 = torch.argmax(model_vgg16(x_cade), dim=1)  # transfer to vgg16
             pred_vgg16_pgd = torch.argmax(model_vgg16_pgd(x_cade), dim=1)  # transfer to vgg16 pgd defense
 
-        is_success_resnet50 = (torch.abs(pred_resnet50 - label) > 0).float()
-        is_success_resnet50_pgd = (torch.abs(pred_resnet50_pgd - label) > 0).float()
-        is_success_vgg16 = (torch.abs(pred_vgg16 - label) > 0).float()
-        is_success_vgg16_pgd = (torch.abs(pred_vgg16_pgd - label) > 0).float()
+        is_success_resnet50 = (pred_resnet50 != label).float()
+        is_success_resnet50_pgd = (pred_resnet50_pgd != label).float()
+        is_success_vgg16 = (pred_vgg16 != label).float()
+        is_success_vgg16_pgd = (pred_vgg16_pgd != label).float()
 
         num_success_resnet50_batch_i = torch.sum(is_success_resnet50)
         num_success_resnet50_pgd_batch_i = torch.sum(is_success_resnet50_pgd)
