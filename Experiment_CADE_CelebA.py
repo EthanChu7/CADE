@@ -23,7 +23,7 @@ substitute = args.substitute
 epsilon = args.epsilon
 type_loss = args.type_loss
 num_steps = args.num_steps
-step_size = args.step_size
+lr = args.lr
 path_ckpt_generative = args.path_ckpt_generative
 path_ckpt_resnet50 = args.path_ckpt_resnet50
 path_ckpt_resnet50_pgd = args.path_ckpt_resnet50_pgd
@@ -123,7 +123,7 @@ for mode in range(1):
         pred_ori = torch.argmax(model_white(x), dim=1)
         is_true = (pred_ori == label)
 
-        x_cade = attacker.attack_whitebox(x, label, lr=step_size, epochs=num_steps, type_loss=type_loss, epsilon=epsilons, causal_layer=l_causal[mode])
+        x_cade = attacker.attack_whitebox(x, label, lr=lr, epochs=num_steps, type_loss=type_loss, epsilon=epsilons, causal_layer=l_causal[mode])
 
         if not os.path.exists('res_attack/celeba/cade_{}'.format(substitute)):
             os.makedirs('res_attack/celeba/cade_{}'.format(substitute))

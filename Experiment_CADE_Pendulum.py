@@ -28,7 +28,7 @@ substitute = args.substitute
 epsilon = args.epsilon
 type_loss = args.type_loss
 num_steps = args.num_steps
-step_size = args.step_size
+lr = args.lr
 path_ckpt_generative = args.path_ckpt_generative
 path_ckpt_resnet50 = args.path_ckpt_resnet50
 path_ckpt_resnet50_pgd = args.path_ckpt_resnet50_pgd
@@ -119,7 +119,7 @@ for mode in range(len(l_attacking_nodes)):
         x = x.to(device)
         label = label.to(device)
 
-        x_cade = attacker.attack_whitebox(x, label, lr=step_size, epochs=num_steps, type_loss=type_loss, epsilon=epsilon * torch.tensor(ranges[mode], dtype=torch.float).to(device), causal_layer=l_causal[mode])
+        x_cade = attacker.attack_whitebox(x, label, lr=lr, epochs=num_steps, type_loss=type_loss, epsilon=epsilon * torch.tensor(ranges[mode], dtype=torch.float).to(device), causal_layer=l_causal[mode])
         x_cade = x_cade.clamp(0, 1)
         
         if not os.path.exists('res_attack/pendulum/cade_{}'.format(substitute)):

@@ -17,7 +17,7 @@ print(args)
 substitute = args.substitute
 epsilons = args.epsilons
 num_steps = args.num_steps
-step_size = args.step_size
+lr = args.lr
 path_lin = args.path_lin
 path_lin_pgd = args.path_lin_pgd
 path_mlp = args.path_mlp
@@ -103,7 +103,7 @@ for mode in range(len(l_attacking_nodes)):
                                 epsilon=epsilons[i] * sub_ranges,
                                 causal_layer=l_causal_layer[mode],
                                 num_steps=num_steps,
-                                step_size=step_size)
+                                lr=lr)
 
         with torch.no_grad():
             pred_adv_lin = model_lin(x_adv)

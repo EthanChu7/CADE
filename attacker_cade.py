@@ -37,7 +37,7 @@ class CADELatent:
         @param x: the original examples with shape [n,.,.,.] where n denotes the batch_size
         @param label: the label with shape [n, ]
         @param epochs: num_steps
-        @param lr: step_size
+        @param lr: learning rate
         @param type_loss: the loss type
         @param epsilon: the budget
         @param causal_layer: apply causal layer or not
@@ -195,14 +195,14 @@ class CADEObservable:
         exogenous = endogenous @ (identity_matrix - causal_dag)
         return exogenous
 
-    def attack(self, endogenous, epsilon=1., causal_layer=True, num_steps=150, step_size=0.1):
+    def attack(self, endogenous, epsilon=1., causal_layer=True, num_steps=150, lr=0.1):
         exogenous = self.recover_exogenous_linear(self.causal_dag, endogenous)
         full_endogenous = endogenous.clone()
 
         attacking_endogenous = endogenous[:, self.attacking_nodes]
         attacking_endogenous.requires_grad_(True)
 
-        optimizer = torch.optim.Adam([attacking_endogenous], lr=step_size)
+        optimizer = torch.optim.Adam([attacking_endogenous], lr=lr)
 
         mask_is_intervened = torch.zeros_like(exogenous)
         min_clip = torch.zeros_like(full_endogenous) - np.inf
