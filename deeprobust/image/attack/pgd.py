@@ -101,7 +101,7 @@ def pgd_attack(model,
     device = X.device
     imageArray = X.detach().cpu().numpy()
     X_random = np.random.uniform(-epsilon, epsilon, X.shape)
-    imageArray = np.clip(imageArray + X_random, 0, 1.0)
+    imageArray = np.clip(imageArray + X_random, clip_min, clip_max)
 
     X_pgd = torch.tensor(imageArray).to(device).float()
     X_pgd.requires_grad = True
