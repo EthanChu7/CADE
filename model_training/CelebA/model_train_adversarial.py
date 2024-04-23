@@ -52,7 +52,7 @@ num_classes = 2
 
 print('====== START TRAINING =====')
 device = 'cuda'
-model = resnet.ResNet50().to(device)
+model = resnet.ResNet50(num_classes=num_classes).to(device)
 
 defense = PGDtraining(model, device)
 defense.generate(train_loader, test_loader, label_idx=39, **defense_params["PGDtraining_CelebA"])
