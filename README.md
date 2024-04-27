@@ -14,7 +14,7 @@ attacker = CADELatent(generative_model=generative_model,
                       
 x_cade = attacker.attack_whitebox(x=x, 
                                   label=label, 
-                                  lr=step_size, 
+                                  lr=lr, 
                                   epochs=num_steps, 
                                   epsilon=epsilon,
                                   causal_layer=causal_layer
@@ -33,7 +33,7 @@ x_cade = attacker.attack(endogenous=endogenous,
                          epsilon=epsilon, 
                          causal_layer=causal_layer,
                          num_steps=num_steps,
-                         step_size=step_size
+                         lr=lr
                          )                                                   
 ```
 
