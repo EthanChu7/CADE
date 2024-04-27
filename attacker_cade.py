@@ -99,10 +99,8 @@ class CADELatent:
             # loss
             if type_loss == 'celeba':
                 target_label = torch.abs(1-label)  # for CelebA dataset
-                # loss_pred = F.cross_entropy(out, target_label) - F.cross_entropy(out, label)
                 loss_pred = 0
                 N = out.shape[0]
-                # out = F.softmax(out, dim=1)
                 for i in range(N):
                     loss_pred = loss_pred - out[i, target_label[i]]
                     loss_pred = loss_pred + out[i, label[i]]
@@ -111,14 +109,11 @@ class CADELatent:
                 loss_pred = -F.cross_entropy(out, label)
             else:
                 loss_pred = -F.cross_entropy(out, label)
-            # loss_size = torch.mean(torch.sum(torch.abs(full_z_adv - full_z), dim=1))
-            # # loss = loss_pred + alpha * loss_size
             loss = loss_pred
             print("epoch: {}, loss_pred: {}".format(epoch, loss_pred))
 
             loss.backward()
             optimizer.step()
-            # print("epoch: {}, loss_pred: {}, loss_size: {}".format(epoch, loss_pred, loss_size))
 
         return x_adv
 
