@@ -36,7 +36,8 @@ for i in range(0, 50):#pendulum
         theta = i*math.pi/200.0
         phi = j*math.pi/200.0
 
-        if count != 4:  # training set, add 15 % noise to pendulum_angle when generating images, representing measurement error
+        if count != 4:
+            # add noise to pendulum_angle when generating images on 15 % of training data, representing measurement error
             theta_img = theta + np.random.binomial(1, 0.15) * 0.1
         else:
             theta_img = theta
