@@ -40,32 +40,32 @@ x_cade = attacker.attack(endogenous=endogenous,
 ## Experiment on Pendulum
 ### To reproduce the result on Pendulum, run 
 ```
-python -u Experiment_CADE_Pendulum.py --substitute resnet50
+python Experiment_CADE_Pendulum.py --substitute resnet50
 ```
 
 ```
-python -u Experiment_CADE_Pendulum.py --substitute vgg16
+python Experiment_CADE_Pendulum.py --substitute vgg16
 ```
 
 
 ## Experiment on CelebA
 ### To reproduce the result on CelebA, run 
 ```
-python -u Experiment_CADE_CelebA.py --substitute resnet50
+python Experiment_CADE_CelebA.py --substitute resnet50
 ```
 
 ```
-python -u Experiment_CADE_CelebA.py --substitute vgg16
+python Experiment_CADE_CelebA.py --substitute vgg16
 ```
 
 ## Experiment on SynMeasurement
 ### To reproduce the result on SynMeasurement, run 
 ```
-python -u Experiment_CADE_SynMeasurement.py --substitute lin
+python Experiment_CADE_SynMeasurement.py --substitute lin
 ```
 
 ```
-python -u Experiment_CADE_SynMeasurement.py --substitute mlp
+python Experiment_CADE_SynMeasurement.py --substitute mlp
 ```
 
 ## Demos on Pendulum and CelebA:
@@ -81,7 +81,7 @@ https://drive.google.com/drive/folders/1khGEtAqlpKtLFspSKdz5zyObwpDGoLzV?usp=sha
 
 ### The causal generative models for Pendulum and CelabA are trained based on [this repository](https://github.com/xwshen51/DEAR)
 
-### Train the attacking models:
+### Train the target models:
 
 [model_training/Pendulum/model_train_standard.py](model_training/Pendulum/model_train_standard.py)
 
