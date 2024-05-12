@@ -81,7 +81,7 @@ def main():
     l_attacking_nodes = [[]]
     l_causal = [False] # since variables z_1:5 both have no descendants in z, thus setting False to avoid extra computations
     epsilons = []
-    scales = np.load('scales_celaba.npy')
+    scales = np.load('scales_celeba.npy')
     for i in range(5):  # attack on z_1:5
         l_attacking_nodes[0].append(i+1)
         epsilons.append(epsilon * scales[i+1])
