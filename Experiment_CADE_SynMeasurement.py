@@ -77,6 +77,7 @@ def main():
 
     l_attacking_nodes = [[4], [4], [5], [5], [5, 6], [5, 6]]  # 4: CP, 5: C1, 6: C2
     l_causal_layer = [True, False, True, False, True, False]
+    l_dags = [3, 3, 2, 2, 1, 1]
 
     if substitute == 'lin':
         model_base = model_lin
@@ -89,7 +90,8 @@ def main():
         attacker = CADEObservable(causal_dag,
                                   attacking_nodes=l_attacking_nodes[mode],
                                   y_index=y_index,
-                                  substitute=model_base)
+                                  substitute=model_base,
+                                  l_dag=l_dags[mode])
         # attacker.attacking_nodes = np.array(l_attacking_nodes[mode])
         sub_ranges = ranges[l_attacking_nodes[mode]]
         print(sub_ranges)
