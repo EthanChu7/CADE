@@ -157,7 +157,7 @@ class CADELatent:
 
 
 class CADEObservable:
-    def __init__(self, causal_dag, attacking_nodes, y_index, substitute):
+    def __init__(self, causal_dag, attacking_nodes, y_index, substitute, l_dag=3):
         """
 
         :param causal_dag: the weighted causal DAG where the data-generating process: X = XA + E
@@ -167,9 +167,11 @@ class CADEObservable:
         self.causal_dag = causal_dag
         self.attacking_nodes = attacking_nodes
         self.y_index = y_index
-        print(self.attacking_nodes)
+        self.l_dag = l_dag
+        # print(self.attacking_nodes)
 
         self.substitute = substitute
+        self.substitute.eval()
         self.substitute.requires_grad_(False)
 
 
@@ -219,7 +221,7 @@ class CADEObservable:
 
 
             if causal_layer:
-                for _ in range(3): # the depth of causal graph is 3
+                for _ in range(self.l_dag):  # the depth of causal graph is self.l_dag
                     full_endogenous = (1-mask_is_intervened) * (full_endogenous @ self.causal_dag) + mask_is_intervened * full_endogenous + (1-mask_is_intervened) * exogenous
 
             # feed the intervened endogenous to surrogate model to get outcome
@@ -248,7 +250,7 @@ class CADEObservable:
         mask_is_intervened[:, self.attacking_nodes] = 1.
 
         if causal_layer:
-            for _ in range(3): # the depth of causal graph is 3
+            for _ in range(self.l_dag):  # the depth of causal graph is self.l_dag
                 full_endogenous = (1-mask_is_intervened) * (full_endogenous @ self.causal_dag) + mask_is_intervened * full_endogenous + (1-mask_is_intervened) * exogenous
         # feed the intervened endogenous to surrogate model to get outcome
         x_adv = torch.cat((full_endogenous[:, :self.y_index], full_endogenous[:, self.y_index+1:]), dim=1)
