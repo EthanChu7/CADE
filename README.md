@@ -17,24 +17,23 @@ x_cade = attacker.attack_whitebox(x=x,
                                   lr=lr, 
                                   epochs=num_steps, 
                                   epsilon=epsilon,
-                                  causal_layer=causal_layer
-                                  )                  
+                                  causal_layer=causal_layer)                  
 ```
 
 
 ## Example for observable
 ```
-attacker = CADEObservable(causal_dag, 
-                          attacking_nodes=np.array(l_attacking_nodes[mode]), 
+attacker = CADEObservable(causal_dag=causal_dag, 
+                          attacking_nodes=attacking_nodes, 
                           y_index=y_index, 
-                          substitute=model_base)
+                          substitute=substitute,
+			  l_dag=l_dag)
                           
 x_cade = attacker.attack(endogenous=endogenous, 
                          epsilon=epsilon, 
                          causal_layer=causal_layer,
                          num_steps=num_steps,
-                         lr=lr
-                         )                                                   
+                         lr=lr)                                                   
 ```
 
 ## Experiment on Pendulum
