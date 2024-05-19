@@ -150,7 +150,6 @@ class CADELatent:
         return x_adv
 
     def f_cw_untargeted(self, outputs, labels, kappa=10):
-        print('cw loss with kappa: {}'.format(kappa))
         one_hot_labels = torch.eye(outputs.shape[1]).to(outputs.device)[labels]
 
         # find the max logit other than the target class
