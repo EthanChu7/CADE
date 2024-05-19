@@ -98,13 +98,7 @@ class CADELatent:
             out = self.substitute(x_adv)
             # loss
             if type_loss == 'celeba':
-                target_label = torch.abs(1-label)  # for CelebA dataset
-                loss_pred = 0
-                N = out.shape[0]
-                for i in range(N):
-                    loss_pred = loss_pred - out[i, target_label[i]]
-                    loss_pred = loss_pred + out[i, label[i]]
-                loss_pred = loss_pred / N  # a variant of f2 formulation in C&W attack
+                loss_pred = self.f_cw_untargeted(out, label, kappa=1e8).mean()
             elif type_loss == 'pendulum':
                 loss_pred = -F.cross_entropy(out, label)
             else:
@@ -154,6 +148,16 @@ class CADELatent:
         x_adv = self.generative_model.decoder(full_z_adv)
 
         return x_adv
+
+    def f_cw_untargeted(self, outputs, labels, kappa=10):
+        print('cw loss with kappa: {}'.format(kappa))
+        one_hot_labels = torch.eye(outputs.shape[1]).to(outputs.device)[labels]
+
+        # find the max logit other than the target class
+        other = torch.max((1 - one_hot_labels) * outputs - one_hot_labels * 1e4, dim=1)[0]
+        # get the target class's logit
+        real = torch.sum(one_hot_labels * outputs, dim=1)
+        return torch.clamp((real - other), min=-kappa)
 
 
 class CADEObservable:
