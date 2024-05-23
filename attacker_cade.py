@@ -197,7 +197,7 @@ class CADEObservable:
 
     def attack(self, endogenous, epsilon=1., causal_layer=True, num_steps=150, lr=0.1):
         exogenous = self.recover_exogenous_linear(self.causal_dag, endogenous)
-        full_endogenous = endogenous.clone()
+        endogenous_adv = endogenous.clone()
 
         attacking_endogenous = endogenous[:, self.attacking_nodes]
         attacking_endogenous.requires_grad_(True)
@@ -205,8 +205,8 @@ class CADEObservable:
         optimizer = torch.optim.Adam([attacking_endogenous], lr=lr)
 
         mask_is_intervened = torch.zeros_like(exogenous)
-        min_clip = torch.zeros_like(full_endogenous) - np.inf
-        max_clip = torch.zeros_like(full_endogenous) + np.inf
+        min_clip = torch.zeros_like(endogenous_adv) - np.inf
+        max_clip = torch.zeros_like(endogenous_adv) + np.inf
         mask_is_intervened[:, self.attacking_nodes] = 1.
         min_clip[:, self.attacking_nodes] = -epsilon
         max_clip[:, self.attacking_nodes] = epsilon
@@ -214,21 +214,21 @@ class CADEObservable:
         for epoch in range(num_steps):
             optimizer.zero_grad()
 
-            full_endogenous = full_endogenous.detach().clone()
+            endogenous_adv = endogenous_adv.detach().clone()
 
-            full_endogenous[:, self.attacking_nodes] = attacking_endogenous
+            endogenous_adv[:, self.attacking_nodes] = attacking_endogenous
 
-            diff_endo = full_endogenous - endogenous
+            diff_endo = endogenous_adv - endogenous
             diff_endo = torch.clamp(diff_endo, min_clip, max_clip)
-            full_endogenous = endogenous + diff_endo
+            endogenous_adv = endogenous + diff_endo
 
 
             if causal_layer:
                 for _ in range(self.l_dag):  # the depth of causal graph is self.l_dag
-                    full_endogenous = (1-mask_is_intervened) * (full_endogenous @ self.causal_dag) + mask_is_intervened * full_endogenous + (1-mask_is_intervened) * exogenous
+                    endogenous_adv = (1-mask_is_intervened) * (endogenous_adv @ self.causal_dag) + mask_is_intervened * endogenous_adv + (1-mask_is_intervened) * exogenous
 
             # feed the intervened endogenous to surrogate model to get outcome
-            x_adv = torch.cat((full_endogenous[:, :self.y_index], full_endogenous[:, self.y_index+1:]), dim=1)
+            x_adv = torch.cat((endogenous_adv[:, :self.y_index], endogenous_adv[:, self.y_index+1:]), dim=1)
             out = self.substitute(x_adv)
 
             # loss
@@ -245,18 +245,18 @@ class CADEObservable:
 
     def attack_random(self, endogenous, epsilon=1., causal_layer=True):
         exogenous = self.recover_exogenous_linear(self.causal_dag, endogenous)
-        full_endogenous = endogenous.clone()
+        endogenous_adv = endogenous.clone()
         delta_attacking_endogenous = (torch.rand((endogenous.shape[0], len(self.attacking_nodes))) - 0.5) * 2 * epsilon
-        full_endogenous[:, self.attacking_nodes] = full_endogenous[:, self.attacking_nodes] + delta_attacking_endogenous
+        endogenous_adv[:, self.attacking_nodes] = endogenous_adv[:, self.attacking_nodes] + delta_attacking_endogenous
 
         mask_is_intervened = torch.zeros_like(exogenous)
         mask_is_intervened[:, self.attacking_nodes] = 1.
 
         if causal_layer:
             for _ in range(self.l_dag):  # the depth of causal graph is self.l_dag
-                full_endogenous = (1-mask_is_intervened) * (full_endogenous @ self.causal_dag) + mask_is_intervened * full_endogenous + (1-mask_is_intervened) * exogenous
+                endogenous_adv = (1-mask_is_intervened) * (endogenous_adv @ self.causal_dag) + mask_is_intervened * endogenous_adv + (1-mask_is_intervened) * exogenous
         # feed the intervened endogenous to surrogate model to get outcome
-        x_adv = torch.cat((full_endogenous[:, :self.y_index], full_endogenous[:, self.y_index+1:]), dim=1)
+        x_adv = torch.cat((endogenous_adv[:, :self.y_index], endogenous_adv[:, self.y_index+1:]), dim=1)
 
         return x_adv
 
