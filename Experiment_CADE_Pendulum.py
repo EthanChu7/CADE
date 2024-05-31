@@ -171,21 +171,21 @@ def main():
                 save_image(x_ori_i.detach().cpu(), "res_attack/pendulum/cade_{}/batch_{}/x_{}_ori.png".format(substitute, batch_id, x_id), normalize=True, scale_each=True)
                 save_image(x_cade_i.detach().cpu(), "res_attack/pendulum/cade_{}/batch_{}/x_{}_cade_mode({})_{}_{}_{}_{}.png".format(substitute, batch_id, x_id, mode, int(is_success_resnet50_i), int(is_success_resnet50_pgd_i), int(is_success_vgg16_i), int(is_success_vgg16_pgd_i)), normalize=True, scale_each=True)
 
-        asr_resnet50_base = num_success_resnet50 / size_dataset
-        asr_resnet50_pgd_trans = num_success_resnet50_pgd / size_dataset
-        asr_vgg16_trans = num_success_vgg16 / size_dataset
-        asr_vgg16_pgd_trans = num_success_vgg16_pgd / size_dataset
+        asr_resnet50 = num_success_resnet50 / size_dataset
+        asr_resnet50_pgd = num_success_resnet50_pgd / size_dataset
+        asr_vgg16 = num_success_vgg16 / size_dataset
+        asr_vgg16_pgd = num_success_vgg16_pgd / size_dataset
 
-        l_asr_resnet50.append(asr_resnet50_base.item())
-        l_asr_resnet50_pgd.append(asr_resnet50_pgd_trans.item())
-        l_asr_vgg16.append(asr_vgg16_trans.item())
-        l_asr_vgg16_pgd.append(asr_vgg16_pgd_trans.item())
+        l_asr_resnet50.append(asr_resnet50.item())
+        l_asr_resnet50_pgd.append(asr_resnet50_pgd.item())
+        l_asr_vgg16.append(asr_vgg16.item())
+        l_asr_vgg16_pgd.append(asr_vgg16_pgd.item())
 
         print("Attacking variables: ", l_attacking_nodes[mode])
-        print("resnet50 asr: {}".format(asr_resnet50_base))
-        print("resnet50 pgd asr: {}".format(asr_resnet50_pgd_trans))
-        print("vgg16 asr: {}".format(asr_vgg16_trans))
-        print("vgg16 pgd asr: {}".format(asr_vgg16_pgd_trans))
+        print("resnet50 asr: {}".format(asr_resnet50))
+        print("resnet50 pgd asr: {}".format(asr_resnet50_pgd))
+        print("vgg16 asr: {}".format(asr_vgg16))
+        print("vgg16 pgd asr: {}".format(asr_vgg16_pgd))
         print("-------------------------------------------")
 
     print(l_asr_resnet50)
