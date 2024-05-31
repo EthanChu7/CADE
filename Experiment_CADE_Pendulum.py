@@ -182,10 +182,10 @@ def main():
         l_asr_vgg16_pgd.append(asr_vgg16_pgd_trans.item())
 
         print("Attacking variables: ", l_attacking_nodes[mode])
-        print("asr: {}".format(asr_resnet50_base))
-        print("transfer to resnet50 pgd defense, asr: {}".format(asr_resnet50_pgd_trans))
-        print("transfer to vgg16, asr: {}".format(asr_vgg16_trans))
-        print("transfer to vgg16 pgd defense, asr: {}".format(asr_vgg16_pgd_trans))
+        print("resnet50 asr: {}".format(asr_resnet50_base))
+        print("resnet50 pgd asr: {}".format(asr_resnet50_pgd_trans))
+        print("vgg16 asr: {}".format(asr_vgg16_trans))
+        print("vgg16 pgd asr: {}".format(asr_vgg16_pgd_trans))
         print("-------------------------------------------")
 
     print(l_asr_resnet50)
