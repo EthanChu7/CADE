@@ -35,11 +35,11 @@ class CADELatent:
         """
 
         @param x: the original examples with shape [n,.,.,.] where n denotes the batch_size
-        @param label: the label with shape [n, ]
+        @param label: the label with shape [n]
         @param epochs: num_steps
         @param lr: learning rate
         @param type_loss: the loss type
-        @param epsilon: the budget
+        @param epsilon: the intervention budget
         @param causal_layer: apply causal layer or not
         @return: the adversarial examples
         """
@@ -115,7 +115,7 @@ class CADELatent:
         """
 
         @param x: the original examples with shape [n,.,.,.] where n denotes the batch_size
-        @param epsilon: the budget
+        @param epsilon: the intervention budget
         @param causal_layer: apply causal layer or not
         @return: the adversarial examples
         """
@@ -163,9 +163,11 @@ class CADEObservable:
     def __init__(self, causal_dag, attacking_nodes, y_index, substitute, l_dag=3):
         """
 
-        :param causal_dag: the weighted causal DAG where the data-generating process: X = XA + E
-        :param y_index: the index of y in X
-        :param model_reg: the regression model we are about to attack
+        @param causal_dag: the weighted adjacency matrix of the causal DAG
+        @param attacking_nodes: The indices of variables we aim to attack at
+        @param y_index: the index of y in x
+        @param substitute: The substitute model we use to perform white-box attack
+        @param l_dag: the depth of causal graph
         """
         self.causal_dag = causal_dag
         self.attacking_nodes = attacking_nodes
