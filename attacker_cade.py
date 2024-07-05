@@ -192,7 +192,7 @@ class CADEObservable:
         torch.FloatTensor of shape [n, d]
         """
         # u = (I-A^T)x
-        # In tensor form, x = x @ A + e -> e = x @ (I - A)
+        # In tensor form, x = x @ A + u -> u = x @ (I - A)
         identity_matrix = torch.eye(causal_dag.shape[0])
         exogenous = endogenous @ (identity_matrix - causal_dag)
         return exogenous
