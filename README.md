@@ -78,7 +78,7 @@ https://drive.google.com/drive/folders/1khGEtAqlpKtLFspSKdz5zyObwpDGoLzV?usp=sha
 
 ## Feel free to train the models from scratch:
 
-### The causal generative models for Pendulum and CelebA are trained based on [this repository](https://github.com/xwshen51/DEAR)
+### The causal generative models for Pendulum and CelebA are trained based on [this repository](https://github.com/xwshen51/DEAR).
 
 ### Train the target models:
 
