@@ -37,7 +37,7 @@ x_cade = attacker.attack(endogenous=endogenous,
 ```
 
 ## Experiment on Pendulum
-### To reproduce the result on Pendulum, run 
+### To reproduce the result on Pendulum, run:
 ```
 python Experiment_CADE_Pendulum.py --substitute resnet50
 ```
@@ -48,7 +48,7 @@ python Experiment_CADE_Pendulum.py --substitute vgg16
 
 
 ## Experiment on CelebA
-### To reproduce the result on CelebA, run 
+### To reproduce the result on CelebA, run:
 ```
 python Experiment_CADE_CelebA.py --substitute resnet50
 ```
@@ -58,7 +58,7 @@ python Experiment_CADE_CelebA.py --substitute vgg16
 ```
 
 ## Experiment on SynMeasurement
-### To reproduce the result on SynMeasurement, run 
+### To reproduce the result on SynMeasurement, run:
 ```
 python Experiment_CADE_SynMeasurement.py --substitute lin
 ```
